@@ -73,15 +73,20 @@ app.post('/api/download', async (req, res) => {
   }
 
   try {
+    // First get video info to get the title
+    const { stdout: infoStdout } = await execAsync(`yt-dlp "${url}" --dump-json`)
+    const videoInfo = JSON.parse(infoStdout)
+    const videoTitle = videoInfo.title.replace(/[^\w\s-]/g, '') // Remove special characters
+
     // Create temporary directory
     const tempId = randomUUID()
     tempDir = path.join(process.cwd(), 'temp', tempId)
     fs.mkdirSync(tempDir, { recursive: true })
 
-    // Build command
+    // Build command with video title
     const outputTemplate = audioOnly ? 
-      "%(title).50s.%(ext)s" : 
-      "%(title).50s.%(ext)s"
+      `${videoTitle}.%(ext)s` : 
+      `${videoTitle}.%(ext)s`
 
     let command = `yt-dlp "${url}" -o "${outputTemplate}"`
 
@@ -144,11 +149,11 @@ app.post('/api/download', async (req, res) => {
     const stats = fs.statSync(filePath)
     const fileBuffer = fs.readFileSync(filePath)
 
-    // Set appropriate headers
+    // Set appropriate headers with the actual video title
     const isAudio = downloadedFile.endsWith('.mp3')
     const contentType = isAudio ? 'audio/mpeg' : 'video/mp4'
     const fileExtension = isAudio ? '.mp3' : '.mp4'
-    const fileName = `download_${Date.now()}${fileExtension}`
+    const fileName = `${videoTitle}${fileExtension}`
 
     res.setHeader('Content-Type', contentType)
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`)
