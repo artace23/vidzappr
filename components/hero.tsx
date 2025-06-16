@@ -169,27 +169,23 @@ export function Hero() {
   }
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8">
+    <section className="py-12 sm:py-20 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto max-w-4xl text-center">
-        <div className="mb-8">
+        <div className="mb-8 sm:mb-12">
           <Badge className="mb-4 bg-blue-900/30 text-blue-300 border-blue-800 hover:bg-blue-900/40">
             <Zap className="mr-1 h-3 w-3" />
             Lightning Fast Downloads
           </Badge>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-white">
-            Download Videos from{" "}
-            <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Any Platform
-            </span>
+          <h1 className="text-3xl sm:text-5xl font-bold mb-4 sm:mb-6 text-white">
+            Download Videos from Any Platform
           </h1>
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Free, fast, and secure video downloader for TikTok, YouTube, and Facebook. No watermarks, multiple formats,
-            and complete privacy protection.
+          <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto">
+            Fast, free, and secure video downloads from YouTube, TikTok, Instagram, and more
           </p>
         </div>
 
-        <Card className="mb-12 enhanced-card enhanced-shadow">
-          <CardContent className="p-8">
+        <Card className="mb-8 sm:mb-12 enhanced-card enhanced-shadow">
+          <CardContent className="p-4 sm:p-8">
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
               <div className="flex-1">
                 <Input
@@ -197,38 +193,41 @@ export function Hero() {
                   placeholder="Paste your video URL here (TikTok, YouTube, Facebook...)"
                   value={url}
                   onChange={handleUrlChange}
-                  className="h-12 text-lg dark-input"
+                  className="h-12 text-base sm:text-lg dark-input"
                 />
               </div>
               <Button
                 onClick={videoInfo ? downloadVideo : analyzeVideo}
                 disabled={!url || isLoading}
-                className="h-12 px-8 gradient-button"
+                className="h-12 px-4 sm:px-8 gradient-button whitespace-nowrap"
               >
                 {isLoading ? (
                   <>
                     <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    {videoInfo ? "Downloading..." : "Analyzing..."}
+                    <span className="hidden sm:inline">{videoInfo ? "Downloading..." : "Analyzing..."}</span>
+                    <span className="sm:hidden">{videoInfo ? "↓" : "✓"}</span>
                   </>
                 ) : videoInfo ? (
                   <>
                     <Download className="mr-2 h-4 w-4" />
-                    Download
+                    <span className="hidden sm:inline">Download</span>
+                    <span className="sm:hidden">↓</span>
                   </>
                 ) : (
                   <>
                     <Zap className="mr-2 h-4 w-4" />
-                    Analyze
+                    <span className="hidden sm:inline">Analyze</span>
+                    <span className="sm:hidden">✓</span>
                   </>
                 )}
               </Button>
             </div>
 
             {videoInfo && (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <VideoPreview videoInfo={videoInfo} />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-2 text-gray-300">Format & Quality</label>
                     <Select value={selectedFormat} onValueChange={setSelectedFormat}>
@@ -249,55 +248,40 @@ export function Hero() {
                     </Select>
                   </div>
 
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="audio-only" checked={audioOnly} onCheckedChange={setAudioOnly} />
-                      <label htmlFor="audio-only" className="text-sm font-medium text-gray-300">
-                        Audio only (MP3)
-                      </label>
-                    </div>
-
+                  <div className="space-y-4">
                     {videoInfo.platform === "tiktok" && (
                       <div className="flex items-center space-x-2">
                         <Checkbox
-                          id="remove-watermark"
+                          id="removeWatermark"
                           checked={removeWatermark}
-                          onCheckedChange={setRemoveWatermark}
+                          onCheckedChange={(checked) => setRemoveWatermark(checked as boolean)}
                         />
-                        <label htmlFor="remove-watermark" className="text-sm font-medium text-gray-300">
-                          Remove TikTok watermark
+                        <label
+                          htmlFor="removeWatermark"
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-300"
+                        >
+                          Remove Watermark
                         </label>
                       </div>
                     )}
-                  </div>
-                </div>
 
-                <div className="bg-yellow-900/20 border border-yellow-800 rounded-lg p-4">
-                  <div className="flex items-start space-x-2">
-                    <AlertTriangle className="h-5 w-5 text-yellow-400 mt-0.5" />
-                    <div className="text-sm text-yellow-200">
-                      <strong>Legal Notice:</strong> Only download content you own or have permission to use. Respect
-                      copyright laws and platform terms of service.
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="audioOnly"
+                        checked={audioOnly}
+                        onCheckedChange={(checked) => setAudioOnly(checked as boolean)}
+                      />
+                      <label
+                        htmlFor="audioOnly"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-300"
+                      >
+                        Audio Only (MP3)
+                      </label>
                     </div>
                   </div>
                 </div>
               </div>
             )}
-
-            <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-400 mt-6">
-              <div className="flex items-center bg-green-900/20 px-3 py-1 rounded-full border border-green-800">
-                <Shield className="mr-1 h-4 w-4 text-green-400" />
-                100% Free
-              </div>
-              <div className="flex items-center bg-blue-900/20 px-3 py-1 rounded-full border border-blue-800">
-                <Clock className="mr-1 h-4 w-4 text-blue-400" />
-                Super Fast
-              </div>
-              <div className="flex items-center bg-purple-900/20 px-3 py-1 rounded-full border border-purple-800">
-                <Link className="mr-1 h-4 w-4 text-purple-400" />
-                No Registration
-              </div>
-            </div>
           </CardContent>
         </Card>
 

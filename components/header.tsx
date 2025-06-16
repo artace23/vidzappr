@@ -42,10 +42,6 @@ export function Header() {
             </a>
           </nav>
 
-          <Button className="gradient-button shadow-lg hover:shadow-xl transition-all duration-300">
-            <Download className="mr-2 h-4 w-4" />
-            Start Download
-          </Button>
         </div>
       </div>
     </header>
