@@ -69,7 +69,6 @@ export function Hero() {
 
     setIsLoading(true)
     try {
-      console.log('RAILWAY_API_URL:', process.env.NEXT_PUBLIC_RAILWAY_API_URL);
       const response = await fetch(API_ENDPOINTS.analyze, {
         method: "POST",
         headers: {
