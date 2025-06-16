@@ -1,0 +1,43 @@
+__Secure-1PAPISID	hA6xk40ddfFFu81_/A9niP53Mq0f_oJSmC	.youtube.com	/	2026-07-21T03:14:37.656Z	51		✓				High
+__Secure-1PSID	g.a000yAhYRk3idvTc-sMXb3ntcPgsu8Bi33SxzMHJ8eP4TyiBR7UjdiyvSHXdjmeqINoQC2QSmgACgYKAWkSARMSFQHGX2Mi5ZUpyXb2Z4X9DKSRJfS8gRoVAUF8yKpWLyd_Kk_JYFdpfAo_lFsv0076	.youtube.com	/	2026-07-21T03:14:37.656Z	167	✓	✓				High
+__Secure-1PSIDCC	AKEyXzWBHaXEVW8sw6FDRgKZ64oOcusb4vI1RZP0wkVDFFwyEO-L1vbweXtLJJsDDjaGBSK0Iw	.youtube.com	/	2026-06-16T03:18:25.789Z	90	✓	✓				High
+__Secure-1PSIDTS	sidts-CjEB5H03P0tJBBuc272xyh4mCI3xDz377NIe_L6CLsw8_GcFKgHogxeI6t9g5hm6N_jMEAA	.youtube.com	/	2026-06-16T03:14:58.801Z	93	✓	✓				High
+__Secure-3PAPISID	hA6xk40ddfFFu81_/A9niP53Mq0f_oJSmC	.youtube.com	/	2026-07-21T03:14:37.656Z	51		✓	None			High
+__Secure-3PSID	g.a000yAhYRk3idvTc-sMXb3ntcPgsu8Bi33SxzMHJ8eP4TyiBR7UjacQySA2icwHQXAVZ2ZCkOAACgYKAdsSARMSFQHGX2MiGFTx2FV4A9TUDl7QrJwLQhoVAUF8yKrRon9jmqY3NnW6sl8m1rnc0076	.youtube.com	/	2026-07-21T03:14:37.656Z	167	✓	✓	None			High
+__Secure-3PSIDCC	AKEyXzXzalWALybd8dKDRlyaakZ6Vzj05HelgrdGTgGmnMKxLp0sCagRVP1ETrnn9UIuKGGT0g	.youtube.com	/	2026-06-16T03:19:55.913Z	90	✓	✓	None			High
+__Secure-3PSIDTS	sidts-CjEB5H03P0tJBBuc272xyh4mCI3xDz377NIe_L6CLsw8_GcFKgHogxeI6t9g5hm6N_jMEAA	.youtube.com	/	2026-06-16T03:14:58.801Z	93	✓	✓	None			High
+__Secure-ROLLOUT_TOKEN	COfttveMr8XvcBC1tevTkb2NAxiPrtvd_PSNAw%3D%3D	.youtube.com	/	2025-12-13T03:14:37.656Z	66	✓	✓	None	https://youtube.com		Medium
+APISID	4KyQkmImx3iP_GoV/Ay-PhhWMfk17lviVO	.youtube.com	/	2026-07-21T03:14:37.655Z	40						High
+HSID	AXlfXwD_diYpMijC9	.youtube.com	/	2026-07-21T03:14:37.655Z	21	✓					High
+LOGIN_INFO	AFmmF2swRQIgIWIJrqMqoBCuYVp_vp96rrRGivQLHiVBA7Rmu6hhOdYCIQDDmScSBUkKoGo1TFzeXfCVKMDyrR9CU4TAhbmakHSPAQ:QUQ3MjNmeTVzN1pocnI3ckI4a2pzVm5JWmc4dlJWM0JKbUp3NU0zN3B5QXo5d3FIQVlpR2tqT1ZuOUJuTUJ0VEw4TzFwdmF4bE5FcDN3dm1jMHNmTzd3Z21KTHFUQkhreTA2UEhrNDl3ZmVJXzZNdVM1N3VsSC0yRzZlMmR4U2t3a0Z5YTM0N0pfWkoxNzJ5THBtdUpjTlk2ajNjME56Qjh3	.youtube.com	/	2025-07-21T15:30:14.201Z	329	✓	✓	None			Medium
+PREF	tz=Asia.Taipei&f4=4000000&f6=40000000&f7=100	.youtube.com	/	2026-07-21T03:14:53.627Z	48		✓				Medium
+SAPISID	hA6xk40ddfFFu81_/A9niP53Mq0f_oJSmC	.youtube.com	/	2026-07-21T03:14:37.655Z	41		✓				High
+SID	g.a000yAhYRk3idvTc-sMXb3ntcPgsu8Bi33SxzMHJ8eP4TyiBR7UjDttVmkwqgHxXzu7ZG2u5dAACgYKAVoSARMSFQHGX2MiAkRhREC5ROsUuJusB6VahBoVAUF8yKp66RbiZlRylq1XokXBryFx0076	.youtube.com	/	2026-07-21T03:14:37.656Z	156						High
+SIDCC	AKEyXzVrUMm2mG3tmRjd9U6MPU3FsVFwhgQqEkWMedMlgci9jgR1R3YFDt-iDy8aqoq_GpTV	.youtube.com	/	2026-06-16T03:18:25.789Z	77						High
+SSID	AJCxk0HB3iX3hWBcJ	.youtube.com	/	2026-07-21T03:14:37.655Z	21	✓	✓				High
+VISITOR_INFO1_LIVE	azMN508j8VA	.youtube.com	/	2025-12-13T03:18:24.196Z	29	✓	✓	None	https://youtube.com		Medium
+VISITOR_PRIVACY_METADATA	CgJQSBIEGgAgZw%3D%3D	.youtube.com	/	2025-12-13T03:18:24.196Z	44	✓	✓	None	https://youtube.com		Medium
+YSC	7HjOFLBiUEY	.youtube.com	/	Session	14	✓	✓	None	https://youtube.com		Medium
+__Secure-1PAPISID	hA6xk40ddfFFu81_/A9niP53Mq0f_oJSmC	.youtube.com	/	2026-07-21T03:14:37.656Z	51		✓				High	
+__Secure-1PAPISID	hA6xk40ddfFFu81_/A9niP53Mq0f_oJSmC	.google.com	/	2026-07-17T14:39:42.920Z	51		✓				High	
+__Secure-1PSID	g.a000yAhYRq_wubYsGZTi9gyLOfo0IJR68k-W05zSZ-pDerc-OfBwVZnOodkusml5iJ1juo_vNwACgYKAR8SARMSFQHGX2MiBwx6picIs4c8Bc5Csjk04BoVAUF8yKp3t6VErILxDV9Md1rwHRlS0076	.google.com	/	2026-07-17T14:39:42.919Z	167	✓	✓				High	
+__Secure-1PSID	g.a000yAhYRk3idvTc-sMXb3ntcPgsu8Bi33SxzMHJ8eP4TyiBR7UjdiyvSHXdjmeqINoQC2QSmgACgYKAWkSARMSFQHGX2Mi5ZUpyXb2Z4X9DKSRJfS8gRoVAUF8yKpWLyd_Kk_JYFdpfAo_lFsv0076	.youtube.com	/	2026-07-21T03:14:37.656Z	167	✓	✓				High	
+__Secure-1PSIDCC	AKEyXzWBHaXEVW8sw6FDRgKZ64oOcusb4vI1RZP0wkVDFFwyEO-L1vbweXtLJJsDDjaGBSK0Iw	.youtube.com	/	2026-06-16T03:18:25.789Z	90	✓	✓				High	
+__Secure-1PSIDCC	AKEyXzU5zsPkG-7BmUR-WsmFfdZ-JQYNqipqJo-oQt7bK26SS_hPFxg47AOUbCSV_9poc1-PBQ	.google.com	/	2026-06-16T03:19:59.083Z	90	✓	✓				High	
+__Secure-1PSIDTS	sidts-CjEB5H03P0tJBBuc272xyh4mCI3xDz377NIe_L6CLsw8_GcFKgHogxeI6t9g5hm6N_jMEAA	.youtube.com	/	2026-06-16T03:14:58.801Z	93	✓	✓				High	
+__Secure-1PSIDTS	sidts-CjEB5H03P3sLNWN5LCBrfFiCUM-cxd1Ysr59-3U_08Kc-1f0cOEECbAyt2vc1Kc12ZqAEAA	.google.com	/	2026-06-16T03:15:13.805Z	93	✓	✓				High	
+__Secure-3PAPISID	hA6xk40ddfFFu81_/A9niP53Mq0f_oJSmC	.youtube.com	/	2026-07-21T03:14:37.656Z	51		✓	None			High	
+__Secure-3PAPISID	hA6xk40ddfFFu81_/A9niP53Mq0f_oJSmC	.google.com	/	2026-07-17T14:39:42.920Z	51		✓	None			High	
+__Secure-3PSID	g.a000yAhYRq_wubYsGZTi9gyLOfo0IJR68k-W05zSZ-pDerc-OfBw2M_-nf0EyNtZxVKrhy5yTwACgYKAbQSARMSFQHGX2Mispboj25V80F4O4-DQ4L15xoVAUF8yKpfYQX47ecFdznicCQvRBZY0076	.google.com	/	2026-07-17T14:39:42.919Z	167	✓	✓	None			High	
+__Secure-3PSID	g.a000yAhYRk3idvTc-sMXb3ntcPgsu8Bi33SxzMHJ8eP4TyiBR7UjacQySA2icwHQXAVZ2ZCkOAACgYKAdsSARMSFQHGX2MiGFTx2FV4A9TUDl7QrJwLQhoVAUF8yKrRon9jmqY3NnW6sl8m1rnc0076	.youtube.com	/	2026-07-21T03:14:37.656Z	167	✓	✓	None			High	
+__Secure-3PSIDCC	AKEyXzXzalWALybd8dKDRlyaakZ6Vzj05HelgrdGTgGmnMKxLp0sCagRVP1ETrnn9UIuKGGT0g	.youtube.com	/	2026-06-16T03:19:55.913Z	90	✓	✓	None			High	
+__Secure-3PSIDCC	AKEyXzXr6vd9HbhA-Kv3qIXPhAS9w-mbeYhlv0yEdP9FKFq4KB4Nko5265zsC_JMs1txQfMGpEY	.google.com	/	2026-06-16T03:19:59.083Z	91	✓	✓	None			High	
+__Secure-3PSIDTS	sidts-CjEB5H03P0tJBBuc272xyh4mCI3xDz377NIe_L6CLsw8_GcFKgHogxeI6t9g5hm6N_jMEAA	.youtube.com	/	2026-06-16T03:14:58.801Z	93	✓	✓	None			High	
+__Secure-3PSIDTS	sidts-CjEB5H03P3sLNWN5LCBrfFiCUM-cxd1Ysr59-3U_08Kc-1f0cOEECbAyt2vc1Kc12ZqAEAA	.google.com	/	2026-06-16T03:15:13.806Z	93	✓	✓	None			High	
+__Secure-ROLLOUT_TOKEN	COfttveMr8XvcBC1tevTkb2NAxiPrtvd_PSNAw%3D%3D	.youtube.com	/	2025-12-13T03:14:37.656Z	66	✓	✓	None	https://youtube.com		Medium	
+AEC	AVh_V2ha97F2-F3Y95XILGBhcHnc-r2MtRu0EuetSNmDSMHtegUcRwRT1A	.google.com	/	2025-11-20T22:13:40.819Z	61	✓	✓	Lax			Medium	
+APISID	4KyQkmImx3iP_GoV/Ay-PhhWMfk17lviVO	.google.com	/	2026-07-17T14:39:42.920Z	40						High	
+APISID	4KyQkmImx3iP_GoV/Ay-PhhWMfk17lviVO	.youtube.com	/	2026-07-21T03:14:37.655Z	40						High	
+HSID	AzoiZJzyEX_ZPvxzw	.google.com	/	2026-07-17T14:39:42.920Z	21	✓					High	
+HSID	AXlfXwD_diYpMijC9	.youtube.com	/	2026-07-21T03:14:37.655Z	21	✓					High	
+LOGIN_INFO	AFmmF2swRQIgIWIJrqMqoBCuYVp_vp96rrRGivQLHiVBA7Rmu6hhOdYCIQDDmScSBUkKoGo1TFzeXfCVKMDyrR9CU4TAhbmakHSPAQ:QUQ3MjNmeTVzN1pocnI3ckI4a2pzVm5JWmc4dlJWM0JKbUp3NU0zN3B5QXo5d3FIQVlpR2tqT1ZuOUJuTUJ0VEw4TzFwdmF4bE5FcDN3dm1jMHNmTzd3Z21KTHFUQkhreTA2UEhrNDl3ZmVJXzZNdVM1N3VsSC0yRzZlMmR4U2t3a0Z5YTM0N0pfWkoxNzJ5THBtdUpjTlk2ajNjME56Qjh3	.youtube.com	/	2025-07-21T15:30:14.201Z	329	✓	✓	None			Medium	
