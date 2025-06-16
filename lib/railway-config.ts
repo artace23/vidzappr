@@ -1,4 +1,4 @@
-export const RAILWAY_API_URL = process.env.RAILWAY_API_URL || 'http://localhost:3000'
+export const RAILWAY_API_URL = process.env.NEXT_PUBLIC_RAILWAY_API_URL || 'http://localhost:3001'
 
 export const API_ENDPOINTS = {
   analyze: `${RAILWAY_API_URL}/api/analyze`,
