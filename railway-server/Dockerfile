@@ -29,6 +29,9 @@ RUN mkdir -p temp
 # Build TypeScript
 RUN npm run build
 
+# Copy cookies file for yt-dlp authentication
+COPY cookies.txt /app/cookies.txt
+
 # Expose port
 EXPOSE 3001
 

@@ -67,8 +67,9 @@ app.post('/api/analyze', async (req, res) => {
 app.post('/api/download', async (req, res) => {
   const { url, format, removeWatermark, audioOnly } = req.body
   let tempDir: string | null = null
-
+  
   if (!url) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
     return res.status(400).json({ error: 'URL is required' })
   }
 
@@ -76,18 +77,16 @@ app.post('/api/download', async (req, res) => {
     // First get video info to get the title
     const { stdout: infoStdout } = await execAsync(`yt-dlp "${url}" --dump-json`)
     const videoInfo = JSON.parse(infoStdout)
-    const videoTitle = videoInfo.title.replace(/[^\w\s-]/g, '') // Remove special characters
+    // Sanitize title for filesystem and HTTP headers
+    const videoTitle = videoInfo.title.replace(/[^\w\s-]/g, '').replace(/\s+/g, ' ').trim()
 
     // Create temporary directory
     const tempId = randomUUID()
     tempDir = path.join(process.cwd(), 'temp', tempId)
     fs.mkdirSync(tempDir, { recursive: true })
 
-    // Build command with video title
-    const outputTemplate = audioOnly ? 
-      `${videoTitle}.%(ext)s` : 
-      `${videoTitle}.%(ext)s`
-
+    // Build yt-dlp command with proper output template
+    const outputTemplate = audioOnly ? "%(title).50s.%(ext)s" : "%(title).50s.%(ext)s"
     let command = `yt-dlp "${url}" -o "${outputTemplate}"`
 
     if (audioOnly) {
@@ -97,9 +96,10 @@ app.post('/api/download', async (req, res) => {
       if (format && format !== "best") {
         const quality = format.split("-")[1] || "720p"
         const height = quality.replace("p", "")
-        command += ` --format "best[height<=${height}][filesize<200M]/best[height<=${height}][filesize<100M]/best[height<=${height}]/best[filesize<100M]/worst"`
+        // Smart, non-redundant quality selection
+        command += ` --format "best[height<=${height}][ext=mp4]/best[height<=${height}]/best[ext=mp4]/best"`
       } else {
-        command += ' --format "best[height<=1080][filesize<200M]/best[height<=720][filesize<100M]/best[filesize<100M]/best[height<=720]/worst"'
+        command += ' --format "best[height<=1080][ext=mp4]/best[height<=1080]/best[ext=mp4]/best"'
       }
       command += " --merge-output-format mp4"
     }
@@ -112,6 +112,11 @@ app.post('/api/download', async (req, res) => {
     if (url.includes("youtube.com") || url.includes("youtu.be")) {
       command += " --no-warnings --no-playlist"
       command += " --extractor-args 'youtube:player_client=web'"
+      command += " --cookies /app/cookies.txt"
+    }
+
+    if (url.includes("instagram.com")) {
+      command += " --no-warnings"
     }
 
     // General optimizations
@@ -123,25 +128,66 @@ app.post('/api/download', async (req, res) => {
 
     console.log('Executing command:', command)
 
-    // Execute download
-    const { stdout, stderr } = await execAsync(command, {
-      cwd: tempDir,
-      maxBuffer: 1024 * 1024 * 500 // 500MB buffer
-    })
+    // Try download, fallback to lower quality if needed
+    let downloadResult: any
+    try {
+      downloadResult = await Promise.race([
+        execAsync(command, {
+          cwd: tempDir,
+          maxBuffer: 1024 * 1024 * 500, // 500MB buffer
+          timeout: 180000 // 3 minutes
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Download timeout")), 180000)),
+      ])
+    } catch (error) {
+      // If timeout or size error, try with lower quality
+      if (error instanceof Error && (error.message.includes("timeout") || error.message.includes("maxBuffer"))) {
+        console.log("First attempt failed, trying with lower quality...")
+        const fallbackTemplate = audioOnly ? "%(title).30s.%(ext)s" : "%(title).30s.%(ext)s"
+        let fallbackCommand = `yt-dlp "${url}" -o "${fallbackTemplate}"`
+        if (audioOnly) {
+          fallbackCommand += " --extract-audio --audio-format mp3 --audio-quality 128K"
+          fallbackCommand += ' --format "worst[abr<=128]/worstaudio"'
+        } else {
+          fallbackCommand += ' --format "worst[height<=480][ext=mp4]/worst[height<=480]/worst[ext=mp4]/worst"'
+          fallbackCommand += " --merge-output-format mp4"
+        }
+        if (url.includes("youtube.com") || url.includes("youtu.be")) {
+          fallbackCommand += " --no-warnings --no-playlist"
+          fallbackCommand += " --extractor-args 'youtube:player_client=web'"
+          fallbackCommand += " --cookies /app/cookies.txt"
+        }
+        fallbackCommand += " --no-check-certificate --prefer-ffmpeg"
+        fallbackCommand += " --socket-timeout 20 --retries 1"
+        fallbackCommand += " --no-write-description --no-write-info-json --no-embed-subs"
+        downloadResult = await Promise.race([
+          execAsync(fallbackCommand, {
+            cwd: tempDir,
+            maxBuffer: 1024 * 1024 * 100, // 100MB buffer
+            timeout: 120000 // 2 minutes
+          }),
+          new Promise((_, reject) => setTimeout(() => reject(new Error("Download timeout on fallback")), 120000)),
+        ])
+      } else {
+        throw error
+      }
+    }
 
+    const { stdout, stderr } = downloadResult as any
     console.log('yt-dlp stdout:', stdout)
     if (stderr) console.log('yt-dlp stderr:', stderr)
 
     // Find the downloaded file
     const files = fs.readdirSync(tempDir)
-    const downloadedFile = files.find(file => 
-      file.endsWith('.mp4') || 
-      file.endsWith('.mp3') || 
-      file.endsWith('.webm') || 
+    const downloadedFile = files.find(file =>
+      file.endsWith('.mp4') ||
+      file.endsWith('.mp3') ||
+      file.endsWith('.webm') ||
       file.endsWith('.mkv')
     )
 
     if (!downloadedFile) {
+      res.setHeader('Access-Control-Allow-Origin', '*');
       throw new Error('Download failed - no output file found')
     }
 
@@ -153,14 +199,17 @@ app.post('/api/download', async (req, res) => {
     const isAudio = downloadedFile.endsWith('.mp3')
     const contentType = isAudio ? 'audio/mpeg' : 'video/mp4'
     const fileExtension = isAudio ? '.mp3' : '.mp4'
-    const fileName = `${videoTitle}${fileExtension}`
+    // Use the actual file name from yt-dlp output
+    const fileName = downloadedFile
 
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition')
     res.setHeader('Content-Type', contentType)
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`)
     res.setHeader('Content-Length', stats.size.toString())
     res.send(fileBuffer)
-
   } catch (error) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
     console.error('Download error:', error)
     res.status(500).json({ 
       error: error instanceof Error ? error.message : 'Download failed'
