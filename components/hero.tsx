@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Download, Link, Zap, Shield, Clock, AlertTriangle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { VideoPreview } from "@/components/video-preview"
+import { API_ENDPOINTS } from "@/lib/railway-config"
 
 interface VideoInfo {
   title: string
@@ -49,27 +50,18 @@ export function Hero() {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (url && isValidUrl(url)) {
-        analyzeVideo()
+        handleAnalyze()
       }
     }, 1000)
 
     return () => clearTimeout(timer)
   }, [url])
 
-  const analyzeVideo = async () => {
+  const handleAnalyze = async () => {
     if (!url) {
       toast({
         title: "Error",
-        description: "Please enter a video URL",
-        variant: "destructive",
-      })
-      return
-    }
-
-    if (!isValidUrl(url)) {
-      toast({
-        title: "Invalid URL",
-        description: "Please enter a valid video URL from supported platforms",
+        description: "Please enter a URL",
         variant: "destructive",
       })
       return
@@ -77,75 +69,91 @@ export function Hero() {
 
     setIsLoading(true)
     try {
-      const response = await fetch("/api/analyze", {
+      const response = await fetch(API_ENDPOINTS.analyze, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ url }),
       })
 
       if (!response.ok) {
-        throw new Error("Failed to analyze video")
+        const error = await response.json()
+        throw new Error(error.error || "Failed to analyze video")
       }
 
       const data = await response.json()
       setVideoInfo(data)
-      toast({
-        title: "Video analyzed!",
-        description: "Choose your download options below",
-      })
     } catch (error) {
+      console.error("Analysis error:", error)
       toast({
-        title: "Analysis failed",
-        description: "Could not analyze the video. Please check the URL and try again.",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to analyze video",
         variant: "destructive",
       })
-      setVideoInfo(null)
     } finally {
       setIsLoading(false)
     }
   }
 
-  const downloadVideo = async () => {
-    if (!videoInfo) {
-      await analyzeVideo()
-      if (!videoInfo) return // If analysis failed, don't proceed with download
+  const handleDownload = async () => {
+    if (!url) {
+      toast({
+        title: "Error",
+        description: "Please enter a URL",
+        variant: "destructive",
+      })
+      return
     }
 
     setIsLoading(true)
     try {
-      const response = await fetch("/api/download", {
+      const response = await fetch(API_ENDPOINTS.download, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           url,
           format: selectedFormat,
-          removeWatermark: removeWatermark && videoInfo.platform === "tiktok",
+          removeWatermark,
           audioOnly,
         }),
       })
 
       if (!response.ok) {
-        throw new Error("Download failed")
+        const error = await response.json()
+        throw new Error(error.error || "Download failed")
       }
 
+      // Get the filename from the Content-Disposition header
+      const contentDisposition = response.headers.get("Content-Disposition")
+      const filename = contentDisposition
+        ? contentDisposition.split("filename=")[1].replace(/"/g, "")
+        : `download_${Date.now()}.${audioOnly ? "mp3" : "mp4"}`
+
+      // Create a blob from the response
       const blob = await response.blob()
       const downloadUrl = window.URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = downloadUrl
-      a.download = `${videoInfo.title}.${audioOnly ? "mp3" : "mp4"}`
-      document.body.appendChild(a)
-      a.click()
+
+      // Create a temporary link and trigger the download
+      const link = document.createElement("a")
+      link.href = downloadUrl
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
       window.URL.revokeObjectURL(downloadUrl)
-      document.body.removeChild(a)
 
       toast({
-        title: "Download complete!",
-        description: "Your video has been downloaded successfully",
+        title: "Success",
+        description: "Download started",
       })
     } catch (error) {
+      console.error("Download error:", error)
       toast({
-        title: "Download failed",
-        description: "Could not download the video. Please try again.",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Download failed",
         variant: "destructive",
       })
     } finally {
@@ -197,7 +205,7 @@ export function Hero() {
                 />
               </div>
               <Button
-                onClick={videoInfo ? downloadVideo : analyzeVideo}
+                onClick={videoInfo ? handleDownload : handleAnalyze}
                 disabled={!url || isLoading}
                 className="h-12 px-4 sm:px-8 gradient-button whitespace-nowrap"
               >

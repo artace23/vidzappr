@@ -32,32 +32,60 @@ export async function POST(request: NextRequest) {
       fs.mkdirSync(tempDir, { recursive: true })
     }
 
-    // Determine file extension and output path
-    const fileExtension = audioOnly ? "mp3" : "mp4"
-    const fileName = `download_${Date.now()}.${fileExtension}`
-    outputPath = path.join(tempDir, fileName)
-
-    // Build yt-dlp command
-    const command = buildYtDlpCommand(url, outputPath, format, audioOnly, removeWatermark)
+    // Build yt-dlp command with proper output template
+    const command = buildYtDlpCommand(url, tempDir, format, audioOnly, removeWatermark)
 
     console.log("Executing command:", command)
 
-    // Execute download with timeout (5 minutes max)
-    const { stdout, stderr } = await Promise.race([
-      execAsync(command, {
-        maxBuffer: 1024 * 1024 * 100, // 100MB buffer
-        timeout: 300000, // 5 minutes timeout
-      }),
-      new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Download timeout")), 300000)),
-    ])
+    // Execute download with progressive timeout and quality fallback
+    let downloadResult
+    try {
+      downloadResult = await Promise.race([
+        execAsync(command, {
+          maxBuffer: 1024 * 1024 * 500, // 500MB buffer
+          timeout: 180000, // 3 minutes timeout
+          cwd: tempDir
+        }),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Download timeout")), 180000)),
+      ])
+    } catch (error) {
+      // If timeout or size error, try with lower quality
+      if (error instanceof Error && (error.message.includes("timeout") || error.message.includes("maxBuffer"))) {
+        console.log("First attempt failed, trying with lower quality...")
+        const fallbackCommand = buildFallbackCommand(url, audioOnly)
+        
+        downloadResult = await Promise.race([
+          execAsync(fallbackCommand, {
+            maxBuffer: 1024 * 1024 * 100, // 100MB buffer
+            timeout: 120000, // 2 minutes timeout
+            cwd: tempDir
+          }),
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Download timeout on fallback")), 120000)),
+        ])
+      } else {
+        throw error
+      }
+    }
+
+    const { stdout, stderr } = downloadResult
 
     console.log("yt-dlp stdout:", stdout)
     if (stderr) console.log("yt-dlp stderr:", stderr)
 
-    // Check if file was created
-    if (!fs.existsSync(outputPath)) {
-      throw new Error("Download failed - file not created")
+    // Find the downloaded file
+    const files = fs.readdirSync(tempDir)
+    const downloadedFile = files.find(file => 
+      file.endsWith('.mp4') || 
+      file.endsWith('.mp3') || 
+      file.endsWith('.webm') || 
+      file.endsWith('.mkv')
+    )
+
+    if (!downloadedFile) {
+      throw new Error("Download failed - no output file found")
     }
+
+    outputPath = path.join(tempDir, downloadedFile)
 
     // Get file stats
     const stats = fs.statSync(outputPath)
@@ -68,9 +96,15 @@ export async function POST(request: NextRequest) {
     // Read file
     const fileBuffer = fs.readFileSync(outputPath)
 
+    // Determine content type and filename
+    const isAudio = downloadedFile.endsWith('.mp3')
+    const contentType = isAudio ? "audio/mpeg" : "video/mp4"
+    const fileExtension = isAudio ? ".mp3" : ".mp4"
+    const fileName = `download_${Date.now()}${fileExtension}`
+
     // Set appropriate headers
     const headers = new Headers()
-    headers.set("Content-Type", audioOnly ? "audio/mpeg" : "video/mp4")
+    headers.set("Content-Type", contentType)
     headers.set("Content-Disposition", `attachment; filename="${fileName}"`)
     headers.set("Content-Length", stats.size.toString())
 
@@ -83,14 +117,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: errorMessage }, { status: 500 })
   } finally {
     // Cleanup temporary files
-    if (outputPath && fs.existsSync(outputPath)) {
-      try {
-        fs.unlinkSync(outputPath)
-      } catch (cleanupError) {
-        console.error("Cleanup error:", cleanupError)
-      }
-    }
-
     if (tempDir && fs.existsSync(tempDir)) {
       try {
         fs.rmSync(tempDir, { recursive: true, force: true })
@@ -103,49 +129,93 @@ export async function POST(request: NextRequest) {
 
 function buildYtDlpCommand(
   url: string,
-  outputPath: string,
+  outputDir: string,
   format: string,
   audioOnly: boolean,
   removeWatermark: boolean,
 ): string {
-  let command = `yt-dlp "${url}" -o "${outputPath}"`
+  // Use output template instead of specific path
+  const outputTemplate = audioOnly ? 
+    "%(title).50s.%(ext)s" : 
+    "%(title).50s.%(ext)s"
+
+  let command = `yt-dlp "${url}" -o "${outputTemplate}"`
 
   if (audioOnly) {
-    // Extract audio only
-    command += " --extract-audio --audio-format mp3 --audio-quality 0"
+    // Extract audio with reasonable quality
+    command += " --extract-audio --audio-format mp3 --audio-quality 192K"
+    // Best audio quality format selection
+    command += ' --format "bestaudio[abr<=320]/bestaudio/best"'
   } else {
-    // Video download with quality selection
-    const quality = format.split("-")[1] || "720p"
-    const height = quality.replace("p", "")
+    // Video download with smart quality selection
+    if (format && format !== "best") {
+      const quality = format.split("-")[1] || "720p"
+      const height = quality.replace("p", "")
+      
+      // Format selection with size limits
+      command += ` --format "best[height<=${height}][filesize<200M]/best[height<=${height}][filesize<100M]/best[height<=${height}]/best[filesize<100M]/worst"`
+    } else {
+      // Smart quality selection - prioritize reasonable file sizes
+      command += ' --format "best[height<=1080][filesize<200M]/best[height<=720][filesize<100M]/best[filesize<100M]/best[height<=720]/worst"'
+    }
 
-    // Format selection for best quality within height limit
-    command += ` --format "best[height<=${height}][ext=mp4]/best[height<=${height}]/best[ext=mp4]/best"`
-
-    // Ensure mp4 output
+    // Post-processing to ensure reasonable file size
     command += " --merge-output-format mp4"
   }
 
   // Platform-specific optimizations
   if (url.includes("tiktok.com")) {
     if (removeWatermark) {
-      // Use specific extractors that can remove watermarks
       command += ' --extractor-args "tiktok:watermark=false"'
     }
+    // TikTok videos are usually small, use best quality
+    command = command.replace(/\[filesize<[^\]]+\]/g, '')
   }
 
   if (url.includes("youtube.com") || url.includes("youtu.be")) {
-    // YouTube-specific optimizations
     command += " --no-warnings --no-playlist"
+    // Use faster extraction for YouTube
+    command += " --extractor-args 'youtube:player_client=web'"
   }
 
   if (url.includes("instagram.com")) {
-    // Instagram-specific settings
     command += " --no-warnings"
   }
 
-  // General optimizations
-  command += " --no-check-certificate --prefer-ffmpeg --ffmpeg-location /usr/bin/ffmpeg"
-  command += " --socket-timeout 30 --retries 3"
+  // General optimizations for speed
+  command += " --no-check-certificate --prefer-ffmpeg"
+  
+  // Faster connection settings
+  command += " --socket-timeout 30 --retries 2 --fragment-retries 2"
+  command += " --concurrent-fragments 3"
+  
+  // Skip unnecessary features for speed
+  command += " --no-write-description --no-write-info-json"
+  command += " --no-write-comments --no-embed-subs"
+
+  return command
+}
+
+function buildFallbackCommand(url: string, audioOnly: boolean): string {
+  const outputTemplate = audioOnly ? 
+    "%(title).30s.%(ext)s" : 
+    "%(title).30s.%(ext)s"
+
+  let command = `yt-dlp "${url}" -o "${outputTemplate}"`
+
+  if (audioOnly) {
+    // Low quality audio for speed
+    command += " --extract-audio --audio-format mp3 --audio-quality 128K"
+    command += ' --format "worst[abr<=128]/worstaudio"'
+  } else {
+    // Low quality video for speed
+    command += ' --format "worst[height<=480][filesize<50M]/worst[ext=mp4]/worst"'
+    command += " --merge-output-format mp4"
+  }
+
+  // Speed optimizations
+  command += " --no-check-certificate --socket-timeout 20 --retries 1"
+  command += " --no-write-description --no-write-info-json --no-embed-subs"
 
   return command
 }
@@ -163,6 +233,8 @@ function isValidUrl(url: string): boolean {
     "vimeo.com",
     "dailymotion.com",
     "twitch.tv",
+    "reddit.com",
+    "streamable.com"
   ]
 
   try {
@@ -177,14 +249,14 @@ function getErrorMessage(error: any): string {
   const errorStr = error?.message || error?.toString() || "Unknown error"
 
   if (errorStr.includes("timeout")) {
-    return "Download timeout - the video may be too large or the server is busy"
+    return "Download timeout - the video may be too large or the server is busy. Try a lower quality format."
   }
 
   if (errorStr.includes("private") || errorStr.includes("unavailable")) {
     return "Video is private or unavailable"
   }
 
-  if (errorStr.includes("geo")) {
+  if (errorStr.includes("geo") || errorStr.includes("not available in your country")) {
     return "Video is not available in your region"
   }
 
@@ -200,20 +272,44 @@ function getErrorMessage(error: any): string {
     return "Live streams cannot be downloaded"
   }
 
-  return "Download failed - please check the URL and try again"
+  if (errorStr.includes("Premium")) {
+    return "This video requires a premium subscription"
+  }
+
+  if (errorStr.includes("format") || errorStr.includes("No video formats")) {
+    return "No suitable video format found. The video may be unavailable or region-locked."
+  }
+
+  if (errorStr.includes("HTTP Error 403") || errorStr.includes("Forbidden")) {
+    return "Access forbidden - the video may be region-locked or require authentication"
+  }
+
+  if (errorStr.includes("HTTP Error 404")) {
+    return "Video not found - the URL may be incorrect or the video may have been deleted"
+  }
+
+  // Log the actual error for debugging
+  console.error("Unhandled error:", errorStr)
+  
+  return "Download failed - please check the URL and try again. If the issue persists, the video may not be publicly accessible."
 }
 
 // Health check endpoint
 export async function GET() {
   try {
-    // Check if yt-dlp is installed
-    await execAsync("yt-dlp --version")
-    return NextResponse.json({ status: "ok", message: "yt-dlp is available" })
+    // Check if yt-dlp is installed and get version
+    const { stdout } = await execAsync("yt-dlp --version")
+    return NextResponse.json({ 
+      status: "ok", 
+      message: "yt-dlp is available",
+      version: stdout.trim()
+    })
   } catch (error) {
     return NextResponse.json(
       {
         status: "error",
         message: "yt-dlp not found - please install it first",
+        error: error instanceof Error ? error.message : "Unknown error"
       },
       { status: 500 },
     )
